@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v3"
-	"github.com/xescugc/go-texture-uv/uv"
+	"github.com/xescugc/texture-uv/uv"
 )
 
 var (

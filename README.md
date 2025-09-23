@@ -1,4 +1,4 @@
-# GO Texture UV
+# Texture UV
 
 Generate and apply UV coordinates to textures.
 
@@ -16,7 +16,7 @@ You need to have 2 things to start with:
 Then you can generate the **Source** with 
 
 ```
-go-texture-uv new-source ./testdata/overlay.character_walk.png ./testdata/map.character.png -o ./testdata/source.character_walk.png
+texture-uv new-source ./testdata/overlay.character_walk.png ./testdata/map.character.png -o ./testdata/source.character_walk.png
 ```
 
 Which will generate the **Source** (UV coordinates) that we'll be able to apply any texture after
@@ -28,7 +28,7 @@ Then to generate a new animation with a texture you need to use the **Lookup**(w
 <img src="testdata/lookup.character_basic.png" width=200>
 
 ```
-go-texture-uv apply ./testdata/source.character_walk.png ./testdata/lookup.character_basic.png -o ./testdata/character_walk.png
+texture-uv apply ./testdata/source.character_walk.png ./testdata/lookup.character_basic.png -o ./testdata/character_walk.png
 ```
 
 <img src="testdata/character_walk.png" width=200>
@@ -38,7 +38,7 @@ Now you can use a different **Lookup** to generate a different animation
 <img src="testdata/lookup.character_helmet.png" width=200>
 <img src="testdata/character_helmet_walk.png" width=200>
 
-## Import Package
+## Import Package (If Golang)
 
 You can also use it as an import package, the `uv` has:
 * `uv.NewSource(o, m image.Image) image.Image`
@@ -46,7 +46,7 @@ You can also use it as an import package, the `uv` has:
 
 Which can then be used dynamically from the code if you want to dynamically generate the images.
 
-## `go:generate`
+### `go:generate`
 
 To not have this process be manual, you can run the `new-source` from a `//go:generate` 
 
@@ -54,6 +54,7 @@ To not have this process be manual, you can run the `new-source` from a `//go:ge
 
 * Make it so there is a CLI cmd to read a directory and from a naming convention it automatically generates the **Source** files
 * Instead of running `uv.Apply` it should use Shaders to render the image (specific to Ebiten)
+* Add `gorelease` to have the binary for everyone to use
 
 ## Inspiration
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/xescugc/go-texture-uv/uv"
+	"github.com/xescugc/texture-uv/uv"
 )
 
 func TestNewSource(t *testing.T) {
