@@ -16,7 +16,7 @@ You need to have 2 things to start with:
 Then you can generate the **Source** with 
 
 ```
-golange-texture-uv new-source ./testdata/overlay.character_walk.png ./testdata/map.character.png -o ./testdata/source.character_walk.png
+go-texture-uv new-source ./testdata/overlay.character_walk.png ./testdata/map.character.png -o ./testdata/source.character_walk.png
 ```
 
 Which will generate the **Source** (UV coordinates) that we'll be able to apply any texture after
@@ -28,7 +28,7 @@ Then to generate a new animation with a texture you need to use the **Lookup**(w
 <img src="testdata/lookup.character_basic.png" width=200>
 
 ```
-golange-texture-uv apply ./testdata/source.character_walk.png ./testdata/lookup.character_basic.png -o ./testdata/character_walk.png
+go-texture-uv apply ./testdata/source.character_walk.png ./testdata/lookup.character_basic.png -o ./testdata/character_walk.png
 ```
 
 <img src="testdata/character_walk.png" width=200>
