@@ -1,10 +1,11 @@
 # Texture UV
 
-Generate and apply UV coordinates to textures.
-
-For example it simplifies how a character skin can be changed without having to change all the animations every time
+Generates a Texture Coordinate file (UV) named Source from a Map and an Overlay that then can be used (the UV) to 
+apply a Texture/Lookup to it like a Skin on a character
 
 ## How to use it
+
+For the latest version you can download it [here](https://github.com/xescugc/texture-uv/releases)
 
 You need to have 2 things to start with:
 * A **Overlay**: Which uses the colors of the unique colors of the Map to overlay the animation
@@ -54,7 +55,6 @@ To not have this process be manual, you can run the `new-source` from a `//go:ge
 
 * Make it so there is a CLI cmd to read a directory and from a naming convention it automatically generates the **Source** files
 * Instead of running `uv.Apply` it should use Shaders to render the image (specific to Ebiten)
-* Add `gorelease` to have the binary for everyone to use
 
 ## Inspiration
 
