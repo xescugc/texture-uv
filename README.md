@@ -35,9 +35,12 @@ golange-texture-uv apply ./testdata/source.character_walk.png ./testdata/lookup.
 
 Now you can use a different **Lookup** to generate a different animation
 
+<img src="testdata/lookup.character_helmet.png" width=200>
+<img src="testdata/character_helmet_walk.png" width=200>
+
 ## Import Package
 
-You can also use it as an import pacakge, the `uv` has:
+You can also use it as an import package, the `uv` has:
 * `uv.NewSource(o, m image.Image) image.Image`
 * `uv.Apply(s, l image.Image) image.Image` 
 
@@ -54,6 +57,7 @@ To not have this process be manual, you can run the `new-source` from a `//go:ge
 
 ## Inspiration
 
-This lib is 100% inspired in this video which I recommend to 
+This lib is 100% inspired in "Pixel Art Animation. Reinvented - Astortion Devlog" video from "aarthificial" which I recommend to watch to understand
+even more how this works
 
 [![Pixel Art Animation. Reinvented - Astortion Devlog](https://img.youtube.com/vi/HsOKwUwL1bE/0.jpg)](https://www.youtube.com/watch?v=HsOKwUwL1bE)
