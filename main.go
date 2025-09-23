@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/xescugc/golang-texture-uv/cmd"
+	"github.com/xescugc/go-texture-uv/cmd"
 )
 
 func main() {

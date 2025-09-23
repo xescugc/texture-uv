@@ -1,4 +1,4 @@
-# Golang Texture UV
+# GO Texture UV
 
 Generate and apply UV coordinates to textures.
 

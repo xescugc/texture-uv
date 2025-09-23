@@ -1,4 +1,4 @@
-module github.com/xescugc/golang-texture-uv
+module github.com/xescugc/go-texture-uv
 
 go 1.25.1
 
