@@ -182,6 +182,60 @@ var (
 					return fmt.Errorf("found %d color mismatch(es)", len(mismatches))
 				},
 			},
+			{
+				Name:      "diff",
+				Usage:     "Compares two overlays pixel-by-pixel and highlights differences in magenta",
+				ArgsUsage: "[overlay1, overlay2]",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "output", Aliases: []string{"o"}, Usage: "Diff output", Required: true},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					overlay1 := cmd.Args().Get(0)
+					if overlay1 == "" {
+						return fmt.Errorf("Overlay1 is required")
+					}
+
+					overlay2 := cmd.Args().Get(1)
+					if overlay2 == "" {
+						return fmt.Errorf("Overlay2 is required")
+					}
+
+					f1, err := os.Open(overlay1)
+					if err != nil {
+						return fmt.Errorf("failed to open Overlay1 at %q: %w", overlay1, err)
+					}
+					defer f1.Close()
+
+					f2, err := os.Open(overlay2)
+					if err != nil {
+						return fmt.Errorf("failed to open Overlay2 at %q: %w", overlay2, err)
+					}
+					defer f2.Close()
+
+					img1, _, err := image.Decode(f1)
+					if err != nil {
+						return fmt.Errorf("failed to decode Overlay1: %w", err)
+					}
+					img2, _, err := image.Decode(f2)
+					if err != nil {
+						return fmt.Errorf("failed to decode Overlay2: %w", err)
+					}
+
+					diff := uv.Diff(img1, img2)
+
+					fout, err := os.Create(cmd.String("output"))
+					if err != nil {
+						return fmt.Errorf("failed to create output file at %q: %w", cmd.String("output"), err)
+					}
+					defer fout.Close()
+
+					if err = png.Encode(fout, diff); err != nil {
+						return fmt.Errorf("failed to encode PNG: %w", err)
+					}
+
+					return nil
+				},
+			},
 		},
 	}
 )

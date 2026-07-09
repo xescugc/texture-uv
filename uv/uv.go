@@ -114,6 +114,32 @@ func NewSource(o, m image.Image) (image.Image, error) {
 	return srcimg, nil
 }
 
+// Diff compares two overlay images pixel-by-pixel and returns an image
+// highlighting pixels that differ in magenta. Identical or both-transparent
+// pixels become transparent. The output is sized to the union of both bounds.
+func Diff(o1, o2 image.Image) image.Image {
+	b1 := o1.Bounds()
+	b2 := o2.Bounds()
+	union := b1.Union(b2)
+
+	out := image.NewNRGBA(union)
+	magenta := color.NRGBA{255, 0, 255, 255}
+
+	for x := union.Min.X; x < union.Max.X; x++ {
+		for y := union.Min.Y; y < union.Max.Y; y++ {
+			c1 := o1.At(x, y)
+			c2 := o2.At(x, y)
+			r1, g1, b1, a1 := c1.RGBA()
+			r2, g2, b2, a2 := c2.RGBA()
+			if r1 != r2 || g1 != g2 || b1 != b2 || a1 != a2 {
+				out.Set(x, y, magenta)
+			}
+		}
+	}
+
+	return out
+}
+
 // Apply applies to the Source(s) the Lookup(l)
 func Apply(s, l image.Image) image.Image {
 	sbounds := s.Bounds()
