@@ -260,6 +260,70 @@ func TestValidate_RealImages(t *testing.T) {
 	assert.Empty(t, mismatches)
 }
 
+func TestDiff_IdenticalOverlays(t *testing.T) {
+	img := image.NewNRGBA(image.Rect(0, 0, 2, 2))
+	img.Set(0, 0, color.NRGBA{R: 255, G: 0, B: 0, A: 255})
+	img.Set(1, 0, color.NRGBA{R: 0, G: 255, B: 0, A: 255})
+	img.Set(0, 1, color.NRGBA{R: 0, G: 0, B: 255, A: 255})
+	img.Set(1, 1, color.NRGBA{R: 0, G: 0, B: 0, A: 0})
+
+	diff := uv.Diff(img, img)
+
+	expected := image.NewNRGBA(image.Rect(0, 0, 2, 2))
+	assert.Equal(t, expected, diff)
+}
+
+func TestDiff_SinglePixelDifference(t *testing.T) {
+	o1 := image.NewNRGBA(image.Rect(0, 0, 2, 1))
+	o1.Set(0, 0, color.NRGBA{R: 255, G: 0, B: 0, A: 255})
+	o1.Set(1, 0, color.NRGBA{R: 0, G: 255, B: 0, A: 255})
+
+	o2 := image.NewNRGBA(image.Rect(0, 0, 2, 1))
+	o2.Set(0, 0, color.NRGBA{R: 255, G: 0, B: 0, A: 255}) // same
+	o2.Set(1, 0, color.NRGBA{R: 0, G: 0, B: 255, A: 255}) // different
+
+	diff := uv.Diff(o1, o2)
+
+	expected := image.NewNRGBA(image.Rect(0, 0, 2, 1))
+	expected.Set(1, 0, color.NRGBA{R: 255, G: 0, B: 255, A: 255}) // magenta
+	assert.Equal(t, expected, diff)
+}
+
+func TestDiff_DifferentSizes(t *testing.T) {
+	o1 := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	o1.Set(0, 0, color.NRGBA{R: 255, G: 0, B: 0, A: 255})
+
+	o2 := image.NewNRGBA(image.Rect(0, 0, 2, 2))
+	o2.Set(0, 0, color.NRGBA{R: 255, G: 0, B: 0, A: 255}) // same
+	o2.Set(1, 0, color.NRGBA{R: 0, G: 255, B: 0, A: 255}) // extra
+	o2.Set(0, 1, color.NRGBA{R: 0, G: 0, B: 255, A: 255}) // extra
+	o2.Set(1, 1, color.NRGBA{R: 0, G: 0, B: 0, A: 0})     // both transparent
+
+	diff := uv.Diff(o1, o2)
+
+	// Output covers union (2x2)
+	assert.Equal(t, image.Rect(0, 0, 2, 2), diff.Bounds())
+
+	magenta := color.NRGBA{R: 255, G: 0, B: 255, A: 255}
+	transparent := color.NRGBA{}
+
+	nrgba := diff.(*image.NRGBA)
+	assert.Equal(t, transparent, nrgba.NRGBAAt(0, 0)) // same pixel
+	assert.Equal(t, magenta, nrgba.NRGBAAt(1, 0))     // extra in o2
+	assert.Equal(t, magenta, nrgba.NRGBAAt(0, 1))     // extra in o2
+	assert.Equal(t, transparent, nrgba.NRGBAAt(1, 1)) // both transparent
+}
+
+func TestDiff_BothTransparent(t *testing.T) {
+	o1 := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	o2 := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+
+	diff := uv.Diff(o1, o2)
+
+	expected := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	assert.Equal(t, expected, diff)
+}
+
 func TestApply_TransparentLookupPixelsSkipped(t *testing.T) {
 	// Source pointing to (0,0) in lookup
 	s := image.NewNRGBA(image.Rect(0, 0, 1, 1))
