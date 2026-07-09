@@ -23,6 +23,7 @@ var (
 		Commands: []*cli.Command{
 			batchApplyCmd,
 			generateCmd,
+			newMapCmd,
 			newOverlayCmd,
 			{
 				Name:      "new-source",
