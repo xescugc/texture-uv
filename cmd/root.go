@@ -21,6 +21,7 @@ var (
 		//&cli.BoolFlag{Name: "verbose", Value: false, Usage: "Activate verbose mode to display logs and info"},
 		//},
 		Commands: []*cli.Command{
+			batchApplyCmd,
 			generateCmd,
 			newOverlayCmd,
 			{
