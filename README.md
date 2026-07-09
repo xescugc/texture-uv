@@ -47,6 +47,26 @@ You can also use it as an import package, the `uv` has:
 
 Which can then be used dynamically from the code if you want to dynamically generate the images.
 
+### GPU Shader (Ebiten)
+
+The `ebitenuv` sub-module provides a GPU-based alternative to `uv.Apply` using an Ebiten Kage shader. Instead of generating N spritesheets in memory, you keep one Source texture and N small Lookup textures, composited on the GPU per frame.
+
+```go
+import "github.com/xescugc/texture-uv/ebitenuv"
+
+// In Ebiten game's Draw method:
+func (g *Game) Draw(screen *ebiten.Image) {
+    opts := &ebiten.DrawRectShaderOptions{}
+    opts.GeoM.Translate(100, 50)
+    ebitenuv.DrawWithLookup(screen, g.source, g.currentLookup, opts)
+}
+```
+
+Install with:
+```
+go get github.com/xescugc/texture-uv/ebitenuv
+```
+
 ### `go:generate`
 
 To not have this process be manual, you can run the `new-source` from a `//go:generate` 
@@ -54,7 +74,6 @@ To not have this process be manual, you can run the `new-source` from a `//go:ge
 ## TODO
 
 * Make it so there is a CLI cmd to read a directory and from a naming convention it automatically generates the **Source** files
-* Instead of running `uv.Apply` it should use Shaders to render the image (specific to Ebiten)
 
 ## Inspiration
 
