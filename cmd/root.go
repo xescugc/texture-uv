@@ -22,6 +22,7 @@ var (
 		//},
 		Commands: []*cli.Command{
 			generateCmd,
+			newOverlayCmd,
 			{
 				Name:      "new-source",
 				Usage:     "Creates a new Source based on the Overlay and the Map",
