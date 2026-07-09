@@ -182,6 +182,84 @@ func TestApply_TransparentSourcePixelsSkipped(t *testing.T) {
 	assert.Equal(t, expected, img)
 }
 
+func TestValidate_NoMismatches(t *testing.T) {
+	m := image.NewNRGBA(image.Rect(0, 0, 2, 1))
+	c0 := color.NRGBA{R: 255, G: 0, B: 0, A: 255}
+	c1 := color.NRGBA{R: 0, G: 255, B: 0, A: 255}
+	m.Set(0, 0, c0)
+	m.Set(1, 0, c1)
+
+	o := image.NewNRGBA(image.Rect(0, 0, 2, 1))
+	o.Set(0, 0, c0)
+	o.Set(1, 0, c1)
+
+	mismatches, err := uv.Validate(o, m)
+	require.NoError(t, err)
+	assert.Empty(t, mismatches)
+}
+
+func TestValidate_WithMismatches(t *testing.T) {
+	m := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	m.Set(0, 0, color.NRGBA{R: 255, G: 0, B: 0, A: 255})
+
+	o := image.NewNRGBA(image.Rect(0, 0, 2, 1))
+	o.Set(0, 0, color.NRGBA{R: 0, G: 255, B: 0, A: 255}) // not in map
+	o.Set(1, 0, color.NRGBA{R: 0, G: 0, B: 255, A: 255}) // not in map
+
+	mismatches, err := uv.Validate(o, m)
+	require.NoError(t, err)
+	require.Len(t, mismatches, 2)
+	assert.Equal(t, 0, mismatches[0].X)
+	assert.Equal(t, 0, mismatches[0].Y)
+	assert.Equal(t, 1, mismatches[1].X)
+	assert.Equal(t, 0, mismatches[1].Y)
+}
+
+func TestValidate_DuplicateColorInMap(t *testing.T) {
+	m := image.NewNRGBA(image.Rect(0, 0, 2, 1))
+	c := color.NRGBA{R: 100, G: 50, B: 25, A: 255}
+	m.Set(0, 0, c)
+	m.Set(1, 0, c)
+
+	o := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+
+	_, err := uv.Validate(o, m)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "already present in the Map")
+}
+
+func TestValidate_TransparentPixelsSkipped(t *testing.T) {
+	m := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	m.Set(0, 0, color.NRGBA{R: 255, G: 0, B: 0, A: 255})
+
+	o := image.NewNRGBA(image.Rect(0, 0, 2, 1))
+	o.Set(0, 0, color.NRGBA{R: 255, G: 0, B: 0, A: 255})
+	o.Set(1, 0, color.NRGBA{R: 0, G: 0, B: 0, A: 0}) // transparent — should be skipped
+
+	mismatches, err := uv.Validate(o, m)
+	require.NoError(t, err)
+	assert.Empty(t, mismatches)
+}
+
+func TestValidate_RealImages(t *testing.T) {
+	fo, err := os.Open("../testdata/overlay.character_walk.png")
+	require.NoError(t, err)
+	defer fo.Close()
+
+	fm, err := os.Open("../testdata/map.character.png")
+	require.NoError(t, err)
+	defer fm.Close()
+
+	oimg, _, err := image.Decode(fo)
+	require.NoError(t, err)
+	mimg, _, err := image.Decode(fm)
+	require.NoError(t, err)
+
+	mismatches, err := uv.Validate(oimg, mimg)
+	require.NoError(t, err)
+	assert.Empty(t, mismatches)
+}
+
 func TestApply_TransparentLookupPixelsSkipped(t *testing.T) {
 	// Source pointing to (0,0) in lookup
 	s := image.NewNRGBA(image.Rect(0, 0, 1, 1))

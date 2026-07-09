@@ -18,6 +18,55 @@ func toColorKey(c color.Color) colorKey {
 	return colorKey{r, g, b, a}
 }
 
+// Mismatch represents a non-transparent overlay pixel whose color
+// is not present in the map image.
+type Mismatch struct {
+	X, Y       int
+	R, G, B, A uint32
+}
+
+// Validate checks that every non-transparent pixel in the overlay has a
+// matching color in the map. It returns all mismatches found, along with
+// an error if the map contains duplicate colors.
+func Validate(o, m image.Image) ([]Mismatch, error) {
+	colors := make(map[colorKey]struct{})
+
+	mbounds := m.Bounds()
+	for x := mbounds.Min.X; x < mbounds.Max.X; x++ {
+		for y := mbounds.Min.Y; y < mbounds.Max.Y; y++ {
+			c := m.At(x, y)
+			ck := toColorKey(c)
+			if _, ok := colors[ck]; ok {
+				return nil, fmt.Errorf("The color %s is already present in the Map", c)
+			}
+			_, _, _, a := c.RGBA()
+			if a > 0 {
+				colors[ck] = struct{}{}
+			}
+		}
+	}
+
+	var mismatches []Mismatch
+	obounds := o.Bounds()
+	for x := obounds.Min.X; x < obounds.Max.X; x++ {
+		for y := obounds.Min.Y; y < obounds.Max.Y; y++ {
+			c := o.At(x, y)
+			r, g, b, a := c.RGBA()
+			if a > 0 {
+				ck := toColorKey(c)
+				if _, ok := colors[ck]; !ok {
+					mismatches = append(mismatches, Mismatch{
+						X: x, Y: y,
+						R: r, G: g, B: b, A: a,
+					})
+				}
+			}
+		}
+	}
+
+	return mismatches, nil
+}
+
 // NewSource returns a source image(UV) that then can be used to Apply a Lookup.
 // It expects an Overlay image and a Map image.
 // The Map image must not exceed 255x255 pixels.
