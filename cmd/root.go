@@ -6,6 +6,8 @@ import (
 	"image"
 	"image/png"
 	"os"
+	"os/exec"
+	"runtime"
 
 	"github.com/urfave/cli/v3"
 	"github.com/xescugc/texture-uv/uv"
@@ -125,6 +127,71 @@ var (
 
 					if err = png.Encode(fout, img); err != nil {
 						return fmt.Errorf("failed to encode PNG: %w", err)
+					}
+
+					return nil
+				},
+			},
+			{
+				Name:      "preview",
+				Usage:     "Applies the lookup to the source and opens the result for preview",
+				ArgsUsage: "[source, lookup]",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					source := cmd.Args().Get(0)
+					if source == "" {
+						return fmt.Errorf("Source is required")
+					}
+
+					lookup := cmd.Args().Get(1)
+					if lookup == "" {
+						return fmt.Errorf("Lookup is required")
+					}
+
+					fs, err := os.Open(source)
+					if err != nil {
+						return fmt.Errorf("failed to open Source at %q: %w", source, err)
+					}
+					defer fs.Close()
+
+					fl, err := os.Open(lookup)
+					if err != nil {
+						return fmt.Errorf("failed to open Lookup at %q: %w", lookup, err)
+					}
+					defer fl.Close()
+
+					simg, _, err := image.Decode(fs)
+					if err != nil {
+						return fmt.Errorf("failed to decode Source: %w", err)
+					}
+					limg, _, err := image.Decode(fl)
+					if err != nil {
+						return fmt.Errorf("failed to decode Lookup: %w", err)
+					}
+
+					img := uv.Apply(simg, limg)
+
+					tmpFile, err := os.CreateTemp("", "texture-uv-preview-*.png")
+					if err != nil {
+						return fmt.Errorf("failed to create temp file: %w", err)
+					}
+					defer tmpFile.Close()
+
+					if err = png.Encode(tmpFile, img); err != nil {
+						return fmt.Errorf("failed to encode PNG: %w", err)
+					}
+
+					tmpPath := tmpFile.Name()
+					fmt.Println(tmpPath)
+
+					switch runtime.GOOS {
+					case "linux":
+						_ = exec.Command("xdg-open", tmpPath).Start()
+					case "darwin":
+						_ = exec.Command("open", tmpPath).Start()
+					case "windows":
+						_ = exec.Command("cmd", "/c", "start", tmpPath).Start()
+					default:
+						fmt.Println("could not detect viewer, file saved at:", tmpPath)
 					}
 
 					return nil
