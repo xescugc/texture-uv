@@ -130,6 +130,58 @@ var (
 					return nil
 				},
 			},
+			{
+				Name:      "validate",
+				Usage:     "Validates that all overlay colors exist in the map",
+				ArgsUsage: "[overlay, map]",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					overlay := cmd.Args().Get(0)
+					if overlay == "" {
+						return fmt.Errorf("Overlay is required")
+					}
+
+					omap := cmd.Args().Get(1)
+					if omap == "" {
+						return fmt.Errorf("Map is required")
+					}
+
+					fo, err := os.Open(overlay)
+					if err != nil {
+						return fmt.Errorf("failed to open Overlay at %q: %w", overlay, err)
+					}
+					defer fo.Close()
+
+					fm, err := os.Open(omap)
+					if err != nil {
+						return fmt.Errorf("failed to open Map at %q: %w", omap, err)
+					}
+					defer fm.Close()
+
+					oimg, _, err := image.Decode(fo)
+					if err != nil {
+						return fmt.Errorf("failed to decode Overlay: %w", err)
+					}
+					mimg, _, err := image.Decode(fm)
+					if err != nil {
+						return fmt.Errorf("failed to decode Map: %w", err)
+					}
+
+					mismatches, err := uv.Validate(oimg, mimg)
+					if err != nil {
+						return fmt.Errorf("validation error: %w", err)
+					}
+
+					if len(mismatches) == 0 {
+						fmt.Println("OK: all overlay colors found in map")
+						return nil
+					}
+
+					for _, m := range mismatches {
+						fmt.Printf("mismatch at (%d, %d): RGBA(%d, %d, %d, %d)\n", m.X, m.Y, m.R, m.G, m.B, m.A)
+					}
+					return fmt.Errorf("found %d color mismatch(es)", len(mismatches))
+				},
+			},
 		},
 	}
 )
