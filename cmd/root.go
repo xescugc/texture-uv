@@ -19,6 +19,7 @@ var (
 		//&cli.BoolFlag{Name: "verbose", Value: false, Usage: "Activate verbose mode to display logs and info"},
 		//},
 		Commands: []*cli.Command{
+			generateCmd,
 			{
 				Name:      "new-source",
 				Usage:     "Creates a new Source based on the Overlay and the Map",
